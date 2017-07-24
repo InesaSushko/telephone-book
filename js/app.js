@@ -1,6 +1,4 @@
-
-
-class Html {
+class App {
   constructor() {
     this.headings = ["Name", "Last Name", "Email"];
     this.contacts = [
@@ -18,78 +16,103 @@ class Html {
   }
 
   header() {
-    const header = document.createElement("header");
-    const headInside = `<div class='container top-radius'><h2>Contacts</h2></div>`;
-    header.className = "header";
-    header.innerHTML = headInside;
+    const header = `<header class="header">
+		                  <div class="container top-radius">
+			                  <h2>Contacts</h2>
+		                  </div>
+	                  </header>`;
     return header;
   }
 
-  form() {
-    const form = document.createElement("form");
-    form.className = "form-inline search-form";
-    const div = `<div class='form-group>`;
-    const label = `<label class='sr-only' for= 'search'>Search</label>`;
-    const input = `<input type="text" class="form-control" id= "search" placeholder="Search">`;
-    form.innerHTML = div + label + input + `</div>`;
+  createForm() {
+    const form = `<form class="form-inline search-form">
+				            <div class="form-group">
+					            <label class="sr-only" for="search">Search</label>
+					            <input type="text" class="form-control" id= "search" placeholder="Search">
+				            </div>
+			            </form>`;
     return form;
   }
 
   createContacts(contact) {
     let tags = ``;
     for (let param in contact) {
-      tags += `<td>${contact[param]}</td>`
+      tags += `<td>${contact[param]}</td>`;
     }
-    return tags
+    return tags;
   }
 
-  table() {
-    const table = document.createElement("table");
-    table.className = "table table-hover contacts";
-    const heads = this.headings.map(header => `<th>${header}</th>`).join("");
-    const people = this.contacts.map(contact => `<tr>` + this.createContacts(contact) + `</tr>`).join("");
-    const thead = `<thead><tr>${heads}</tr></thead>`;
-    const tbody = `<tbody>${people}</tbody>`;
-    table.innerHTML = thead + tbody;
+  createTable() {
+    let table = `<table class="table table-hover contacts"><thead>`;
+    table += this.headings.map(header => `<th>${header}</th>`).join("");
+    table += `<tbody>`;
+    table += this.contacts
+      .map(contact => `<tr>` + this.createContacts(contact) + `</tr>`)
+      .join("");
+    table += `</tbody></table>`;
+    table += `</div></main>`;
     return table;
   }
 
-
   main() {
-    const main = document.createElement("main");
-    const div = document.createElement("div");
-    div.className = "container";
-    div.appendChild(this.form());
-    div.appendChild(this.table());
-    main.appendChild(div);
-    return main
+    let mainHTML = `<main><div class="container">`;
+    mainHTML += this.createForm();
+    mainHTML += this.createTable();
+
+    return mainHTML;
   }
 
-  sorting() {
-    const th = [...document.querySelectorAll('th')];
-    const raws = [...document.getElementsByTagName('tr')].slice(1);
-    th.forEach((elem, index) => {
-      elem.onclick = () => {
-        raws.sort((a, b) => {
-          let prev = [...a.querySelectorAll('td')][index].textContent;
-          let next = [...b.querySelectorAll('td')][index].textContent;
-          return prev > next ? 1 : -1});
-        const people = raws.map(elem => elem.outerHTML).join('');
-        const tbody = document.querySelector('tbody');
-        tbody.innerHTML = people;
+  filterEvent() {
+    const search = document.querySelector("#search");
+    search.addEventListener("keydown", e => {
+      this.filterFN(search, e);
+    });
+  }
+
+  filterFN(input, e) {
+    const raws = [...document.getElementsByTagName("tr")].slice(1);
+    let param;
+    let value = input.value;
+    e.key === "Backspace"
+      ? (param = value.slice(0, value.length - 1))
+      : (param = value + e.key);
+    raws.forEach(elem => {
+      let eachName = elem.children[0].textContent.toLowerCase();
+      return eachName.includes(param.toLowerCase()) ? (elem.style.display = "table") : (elem.style.display = "none");
+    });
+  }
+
+  sortingEvent() {
+    const thead = document.querySelector("thead");
+    const th = [...document.querySelectorAll("th")];
+    thead.addEventListener("click", e => {
+      if (e.target.tagName === "TH") {
+        let index = th.indexOf(e.target);
+        this.sortingFN(index);
       }
-    })
+    });
+  }
+
+  sortingFN(index) {
+    const raws = [...document.getElementsByTagName("tr")].slice(1);
+    let newRaws = raws.sort((a, b) => {
+      const raws = [...document.getElementsByTagName("tr")].slice(1);
+      let prev = [...a.querySelectorAll("td")][index].textContent;
+      let next = [...b.querySelectorAll("td")][index].textContent;
+      return prev > next ? 1 : -1;
+    }).map(elem => elem.outerHTML).join("");
+    const tbody = document.querySelector("tbody");
+    tbody.innerHTML = newRaws;
   }
 
   render() {
-    document.body.prepend(this.main());
-    document.body.prepend(this.header());
-    this.sorting()
+    const mainDiv = document.createElement("div");
+    mainDiv.innerHTML = this.header() + this.main();
+    document.body.prepend(mainDiv);
+    this.sortingEvent();
+    this.filterEvent();
   }
 }
 
-let phoneBook = new Html();
+let phoneBook = new App();
 phoneBook.render();
-
-
-
