@@ -329,3 +329,9 @@ h3 {
   margin: 0 auto;
   font-weight: bold;
 }
+
+input{
+  width: 90%;
+  background-color: #ccc;
+  border: none;
+}

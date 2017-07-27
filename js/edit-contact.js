@@ -27,7 +27,8 @@ class EditContact {
     let editFieldHTML = ``;
     arr.forEach(e => {
       editFieldHTML += `<div class="edit-field">
-						    <button href="#" class="add-btn"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+						    <button href="#" class="add-btn">
+                  <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
 							    <span>${e}</span>
 						    </button>
 					    </div>`;

@@ -1,18 +1,8 @@
 class App {
   constructor() {
-    this.headings = ["Name", "Last Name", "Email"];
-    this.contacts = [
-      { name: "Inesa", lastName: "Sushko", email: "inesatat@gmail.com" },
-      { name: "Alla", lastName: "Tsyupak", email: "alla@gmail.com" },
-      { name: "Roman", lastName: "Pelyh", email: "roman@gmail.com" },
-      { name: "Nikolay", lastName: "Sushko", email: "nikolay@gmail.com" },
-      { name: "Kseniya", lastName: "Gurbanova", email: "kseniya@gmail.com" },
-      { name: "Danil", lastName: "Zmuncila", email: "danil@gmail.com" },
-      { name: "Tatyana", lastName: "Sushko", email: "tatyana@gmail.com" },
-      { name: "Alina", lastName: "Pelyh", email: "alina@gmail.com" },
-      { name: "Vika", lastName: "Loskot", email: "vika@gmail.com" },
-      { name: "Grygoriy", lastName: "Kirichenko", email: "grygoriy@gmail.com" }
-    ];
+    this.headings = ["Name", "Phone", "Email"];
+    this.keys = ["fullName", "phone", "email"];
+    this.url = "http://easycode-js.herokuapp.com/inesasushko/users";
   }
 
   header() {
@@ -36,9 +26,9 @@ class App {
 
   createContacts(contact) {
     let tags = ``;
-    for (let param in contact) {
-      tags += `<td>${contact[param]}</td>`;
-    }
+    this.keys.forEach(key => {
+      tags += `<td>${contact[key]}</td>`;
+    });
     return tags;
   }
 
@@ -46,7 +36,7 @@ class App {
     let table = `<table class="table table-hover contacts"><thead>`;
     table += this.headings.map(header => `<th>${header}</th>`).join("");
     table += `<tbody>`;
-    table += this.contacts
+    table += this.users
       .map(contact => `<tr>` + this.createContacts(contact) + `</tr>`)
       .join("");
     table += `</tbody></table>`;
@@ -78,7 +68,9 @@ class App {
       : (param = value + e.key);
     raws.forEach(elem => {
       let eachName = elem.children[0].textContent.toLowerCase();
-      return eachName.includes(param.toLowerCase()) ? (elem.style.display = "table") : (elem.style.display = "none");
+      return eachName.includes(param.toLowerCase())
+        ? (elem.style.display = "table")
+        : (elem.style.display = "none");
     });
   }
 
@@ -95,14 +87,29 @@ class App {
 
   sortingFN(index) {
     const raws = [...document.getElementsByTagName("tr")].slice(1);
-    let newRaws = raws.sort((a, b) => {
-      const raws = [...document.getElementsByTagName("tr")].slice(1);
-      let prev = [...a.querySelectorAll("td")][index].textContent;
-      let next = [...b.querySelectorAll("td")][index].textContent;
-      return prev > next ? 1 : -1;
-    }).map(elem => elem.outerHTML).join("");
+    let newRaws = raws
+      .sort((a, b) => {
+        const raws = [...document.getElementsByTagName("tr")].slice(1);
+        let prev = [...a.querySelectorAll("td")][index].textContent;
+        let next = [...b.querySelectorAll("td")][index].textContent;
+        return prev > next ? 1 : -1;
+      })
+      .map(elem => elem.outerHTML)
+      .join("");
     const tbody = document.querySelector("tbody");
     tbody.innerHTML = newRaws;
+  }
+
+  serverRequest() {
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', this.url, true);
+    xhr.send();
+    xhr.addEventListener("readystatechange", () => {
+      if (xhr.readyState === 4) {
+        this.users = (JSON.parse(xhr.responseText));
+        this.render();
+      }
+    });
   }
 
   render() {
@@ -115,4 +122,4 @@ class App {
 }
 
 let phoneBook = new App();
-phoneBook.render();
+phoneBook.serverRequest();

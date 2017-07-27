@@ -10,6 +10,7 @@ class AddUser {
       "add social profile",
       "add field"
     ];
+    this.url = 'http://easycode-js.herokuapp.com/inesasushko/users';
   }
 
   header() {
@@ -21,16 +22,17 @@ class AddUser {
 			                </nav>
 		                </div>
 	                </header>`;
-    return header
+    return header;
   }
 
   createEditField(arr) {
     let editFieldHTML = ``;
     arr.forEach(e => {
       editFieldHTML += `<div class="edit-field">
-							<button href="#" class="add-btn"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
-								<span>${e}</span>
-							</button>
+							<span href="#" class="add-btn">
+                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+								<input placeholder="${e}"></input>
+							</span>
 						</div>`;
     });
     return editFieldHTML;
@@ -38,7 +40,7 @@ class AddUser {
 
   main() {
     let mainHTML = `<main class="main">
-		                <div class="container">
+		                <form class="container">
 			                <div class="edit-main-info">
 				                <div class="edit-foto">
                                 <button class="add-foto-btn"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
@@ -56,30 +58,60 @@ class AddUser {
 						</div>
 					</div>
 				</div>
-			</div>
+			</form>
 		</main>`;
-    return mainHTML
+    return mainHTML;
   }
 
-    contentEditable() {
-    const main = document.querySelector("main");
-    let activeElem;
-    main.addEventListener("click", e => {
-      if (e.target.className.includes("add-btn")) {
-        activeElem = e.target.children[1];
+//Функция отправки запроса на сервер
+  serverRequest(user) {
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", this.url, true);
+    xhr.setRequestHeader("Content-Type", "application/json")
+    xhr.send(JSON.stringify(user));
+    xhr.addEventListener('readystatechange', () =>{
+      if(xhr.readyState===4){
+        alert(`USER ${(user.fullName).toUpperCase()} HAS BEEN ADDED TO YOUR PHONEBOOK`)
       }
-      if (e.target.parentElement.className.includes("add-btn")) {
-        activeElem = e.target.parentElement.lastElementChild;
+    })
+  }
+
+//Функция проверки правильности номера
+checkIfNumber(num) {
+    return !isNaN(num) && num.length ===10 ? true : false;
+  }
+
+//Функция сохранения пользователя
+  events(){
+    const saveUser = document.querySelector('.done-btn');
+
+    saveUser.addEventListener('click', e =>{
+    const inputs = [...document.querySelectorAll('input')];
+    const name = inputs[0].value;
+    const lastName = inputs[1].value;
+    const phone = inputs[3].value;
+    const email = inputs[5].value;
+      if(!name){
+        return alert('Add username');
+      };
+      if(!phone || !this.checkIfNumber(phone)){
+        return alert('Add correct number')
       }
-      activeElem.contentEditable = "true";
-    });
+      if(!email) {
+        return alert('Add email')
+      }
+
+      let user = {fullName : name+' '+lastName, phone, email}
+
+      this.serverRequest(user)
+    })
   }
 
   render() {
     const mainDiv = document.createElement("div");
     mainDiv.innerHTML = this.header() + this.main();
     document.body.prepend(mainDiv);
-    this.contentEditable()
+    this.events();
   }
 }
 
